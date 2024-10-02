@@ -1,3 +1,4 @@
+import os
 import requests
 import pandas as pd
 import numpy as np
@@ -148,6 +149,9 @@ features['Legs'] = features['Legs'].map(boolMap)
 
 features.drop(['Serial'], axis = 1, inplace=True)
 
+os.makedirs('data', exist_ok=True)
+features.to_csv('data/data.csv')
+
 Y = df['outcome_type']
 X = features.drop(['outcome_type'], axis = 1)
 
@@ -156,6 +160,15 @@ X = transform.fit_transform(X)
 
 x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=2)
 x_train.shape, x_test.shape, y_train.shape, y_test.shape
+
+def save_to_pickle(data, filename):
+    with open(f'data/{filename}', 'wb') as f:
+        pickle.dump(data, f)
+save_to_pickle(x_train, 'x_train.pkl')
+save_to_pickle(x_test, 'x_test.pkl')
+save_to_pickle(y_train, 'y_train.pkl')
+save_to_pickle(y_test, 'y_test.pkl')
+
 
 models = {
     'Logistic Regression': LogisticRegression(),
