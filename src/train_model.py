@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 import numpy as np
 import pickle
+import datetime
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
@@ -65,6 +66,10 @@ data = data[data['payloads'].map(len)==1]
 data['cores'] = data['cores'].map(lambda x : x[0])
 data['payloads'] = data['payloads'].map(lambda x : x[0])
 
+data['date'] = pd.to_datetime(data['date_utc']).dt.date
+
+data = data[data['date'] <= datetime.date(2020, 11, 13)]
+
 BoosterVersion = []
 PayloadMass = []
 Orbit = []
@@ -80,6 +85,11 @@ ReusedCount = []
 Serial = []
 Longitude = []
 Latitude = []
+
+getBoosters(data)
+getPayloadData(data)
+getLaunchSite(data)
+getCoreData(data)
 
 launch_dict = {
 'FlightNumber': list(data['flight_number']),
@@ -114,7 +124,7 @@ bad_outcomes
 
 df['outcome_type'] = df['Outcome'].apply(lambda x: 0 if x in bad_outcomes else 1)
 
-features = df.drop(['Date', 'Outcome', 'Year',  'LandingPad'], axis=1)
+features = df.drop(['Date', 'Outcome',  'LandingPad'], axis=1)
      
 
 features.drop(['BoosterVersion'], axis = 1, inplace=True)
@@ -141,6 +151,7 @@ features.drop(['Serial'], axis = 1, inplace=True)
 Y = df['outcome_type']
 X = features.drop(['outcome_type'], axis = 1)
 
+transform = preprocessing.StandardScaler()
 X = transform.fit_transform(X)
 
 x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=2)
